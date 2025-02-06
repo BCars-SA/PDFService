@@ -10,7 +10,7 @@ Use OpenAPI (Swagger) to generate the documentation:\
 [ASP.NET Core web API documentation with Swagger / OpenAPI](https://learn.microsoft.com/en-us/aspnet/core/tutorials/web-api-help-pages-using-swagger?view=aspnetcore-8.0)
 
 ## Testing
-Every controller must be covered by unit tests.
+Must be covered by unit tests.
 
 ## Layers separation
 DO separate presentation, service and data layers. 
