@@ -9,6 +9,23 @@
 Use OpenAPI (Swagger) to generate the documentation:\
 [ASP.NET Core web API documentation with Swagger / OpenAPI](https://learn.microsoft.com/en-us/aspnet/core/tutorials/web-api-help-pages-using-swagger?view=aspnetcore-8.0)
 
+## Testing
+Every controller must be covered by unit tests.
+
+## Layers separation
+DO separate presentation, service and data layers. 
+### Presentation later also known as the "API endpoint"
+It is responsible for processing incoming requests and returning responses in a format that developers can easily understand.
+
+### Business Logic Layer also known as the "API middleware"
+The business logic layer is where the API's core functionality resides. 
+It may perform data validation, authentication and authorization, database queries, or other complex operations. 
+This layer is typically developed by the service provider and is not exposed directly to developers.
+
+### Data layer also known as the "API database"
+This layer is responsible for managing data storage, retrieval, and modification. 
+It may use a variety of database technologies such as SQL, NoSQL, or object-oriented databases.
+
 ## URI naming
 DO use kebab-casing for URL path segments. If the segment refers to a JSON field, use camel casing.
 
