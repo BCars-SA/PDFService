@@ -1,0 +1,6 @@
+.vs/
+bin/
+API/logs/
+API/obj/
+/API/API.csproj.user
+/API/appsettings.Development.json
