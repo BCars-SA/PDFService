@@ -12,8 +12,8 @@ public class PdfFile
     protected PdfDocument _pdfDocument;
     protected ByteArrayOutputStream? _outputStream;
 
-    protected List<IField>? _fieldsList;
-    protected Dictionary<string, IField> _fieldsDictionary = new Dictionary<string, IField>();
+    protected List<FormField>? _fieldsList;
+    protected Dictionary<string, FormField> _fieldsDictionary = new Dictionary<string, FormField>();
     protected PdfFileOpenMode _mode;
 
     protected bool IsReadOnly => _mode == PdfFileOpenMode.Read;
@@ -39,7 +39,7 @@ public class PdfFile
     {
         if (_fieldsList == null)
         {
-            _fieldsList = new List<IField>();
+            _fieldsList = new List<FormField>();
 
             PdfAcroForm acroForm = PdfFormCreator.GetAcroForm(_pdfDocument, !IsReadOnly);
 
@@ -49,7 +49,7 @@ public class PdfFile
 
                 foreach (var formField in formFields)
                 {
-                    IField field = FieldFactory.Create(formField.Value);
+                    FormField field = FieldFactory.Create(formField.Value);
                     _fieldsList.Add(field);
                     _fieldsDictionary[formField.Key.ToLower()] = field;
                 }
@@ -57,14 +57,14 @@ public class PdfFile
         }
     }
 
-    public List<IField> Fields
+    public List<FormField> Fields
     {
         get
         {
             if (_fieldsList == null)
                 ReadAllFormFields();
 
-            return _fieldsList ?? new List<IField>();
+            return _fieldsList ?? new List<FormField>();
         }
     }
 

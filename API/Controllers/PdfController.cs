@@ -1,6 +1,7 @@
 ﻿using API.Data;
 using API.Models;
 using API.Models.Pdf;
+using API.Models.Pdf.Fields;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Text.Json;
@@ -76,17 +77,15 @@ public class PdfController : BaseController
         return Ok(new FieldsResponse()
         {
             FieldsCount = pdfFile.Fields.Count,
-            Fields = pdfFile.Fields.ConvertAll<Field>(field => new Field()
-            {
-                Name = field.Name,
-                Value = field.Value,
-                DisplayValue = field.DisplayValue,
-                Type = field.Type,
-                Page = field.Page,
-                IsReadOnly = field.IsReadOnly
-            })
+            Fields = pdfFile.Fields
         });
     }
+}
+
+public class FieldsResponse
+{
+    public int FieldsCount { get; set; }
+    public List<FormField>? Fields { get; set; }
 }
 
 public class FormBinder : IModelBinder
@@ -99,7 +98,7 @@ public class FormBinder : IModelBinder
         }
 
         FillRequest fillRequest = new FillRequest();
-        FieldsData fieldsData = new FieldsData() { Fields = new List<Field>() };
+        FieldsData fieldsData = new FieldsData() { Fields = new List<FieldRequest>() };
         foreach (var key in bindingContext.HttpContext.Request.Form.Keys)
         {
             if (key == "data")
@@ -113,7 +112,7 @@ public class FormBinder : IModelBinder
                         {
                             PropertyNameCaseInsensitive = true
                         }
-                    )?.Fields ?? new List<Field>();
+                    )?.Fields ?? new List<FieldRequest>();
                 }
                 catch (Exception ex)
                 {
@@ -141,10 +140,10 @@ public class FillRequest
 
 public class FieldsData
 {
-    public List<Field>? Fields { get; set; }
+    public List<FieldRequest>? Fields { get; set; }
 }
 
-public class Field
+public class FieldRequest
 {
     public string? Name { get; set; } = null;
 
@@ -156,7 +155,6 @@ public class Field
     public double? Y { get; set; }
     public string? Type { get; set; }
     public int? Page { get; set; }
-    public bool? IsReadOnly { get; set; }
 }
 
 public class ValueJsonConverter : JsonConverter<object>
@@ -212,10 +210,4 @@ public class ValueJsonConverter : JsonConverter<object>
     {
         JsonSerializer.Serialize(writer, value, options);
     }
-}
-
-public class FieldsResponse
-{
-    public int FieldsCount { get; set; }
-    public List<Field>? Fields { get; set; }
 }

@@ -2,7 +2,7 @@
 
 namespace API.Models.Pdf.Fields;
 
-public class TextField : BaseField
+public class TextField : FormField
 {
     public TextField(PdfFormField field) : base(field)
     {

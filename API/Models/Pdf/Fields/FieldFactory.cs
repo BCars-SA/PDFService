@@ -10,7 +10,7 @@ public static class FieldFactory
         { typeof(PdfChoiceFormField), typeof(ChoiceField) }
     };
 
-    public static IField Create(PdfFormField formField)
+    public static FormField Create(PdfFormField formField)
     {
         Type type = formField.GetType();
 
@@ -22,10 +22,10 @@ public static class FieldFactory
             {
                 var field = Activator.CreateInstance(fieldType, formField);
                 if (field != null)
-                    return (IField)field;
+                    return (FormField)field;
             }
         }
 
-        return new BaseField(formField);
+        return new FormField(formField);
     }
 }

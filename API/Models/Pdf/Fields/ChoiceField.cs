@@ -3,7 +3,7 @@ using iText.Kernel.Pdf;
 
 namespace API.Models.Pdf.Fields;
 
-public class ChoiceField : BaseField
+public class ChoiceField : FormField
 {
     PdfChoiceFormField PdfChoiceField { get => (PdfChoiceFormField)_field; }
 
@@ -147,17 +147,17 @@ public class ChoiceField : BaseField
         }
     }
 
-    public bool IsCombo
+    bool IsCombo
     {
         get => PdfChoiceField.IsCombo();
     }
 
-    public bool IsEdit
+    bool IsEdit
     {
         get => PdfChoiceField.IsEdit();
     }
 
-    public bool IsMultiSelect
+    bool IsMultiSelect
     {
         get => PdfChoiceField.IsMultiSelect();
     }

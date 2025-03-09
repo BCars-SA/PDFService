@@ -1,15 +1,17 @@
-﻿using iText.Forms.Fields;
+﻿using API.Controllers;
+using iText.Forms.Fields;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Annot;
+using System.Text.Json.Serialization;
 
 namespace API.Models.Pdf.Fields;
 
-public class BaseField : IField
+public class FormField
 {
     protected PdfFormField _field;
     protected PdfDocument _document;
 
-    public BaseField(PdfFormField field)
+    public FormField(PdfFormField field)
     {
         _field = field;
         _document = _field.GetDocument();
@@ -17,6 +19,7 @@ public class BaseField : IField
 
     public string Name => _field.GetFieldName().ToString();
 
+    [JsonConverter(typeof(ValueJsonConverter))]
     public virtual object? Value
     {
         get
@@ -73,14 +76,4 @@ public class BaseField : IField
             return null;
         }
     }
-}
-
-public interface IField
-{
-    string Name { get; }
-    object? Value { get; set; }
-    string? DisplayValue { get; }
-    string Type { get; }
-    bool? IsReadOnly { get; }
-    int? Page { get; }
 }
