@@ -1,5 +1,6 @@
-﻿using API.Models.Pdf;
-using API.Models.Pdf.Fields;
+﻿using API.Models.Responses;
+using API.Models.Requests;
+using API.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -8,8 +9,11 @@ namespace API.Controllers;
 [ApiController]
 public class PdfController : BaseController
 {
-    public PdfController(IConfiguration configuration) : base(configuration)
+    private readonly IPdfService _pdfService;
+
+    public PdfController(IConfiguration configuration, IPdfService pdfService) : base(configuration)
     {
+        _pdfService = pdfService;
     }
 
     [Route("fill")]
@@ -21,30 +25,16 @@ public class PdfController : BaseController
     {
         if (request.file == null)
         {
-            return BadRequestProblem("A PDF file was expected");
+            return BadRequestProblem("'file' was expected in the form");
         }
-
-        if (request.data?.Fields?.Count == 0)
+        if (request.data?.Fields == null || request.data?.Fields?.Count == 0)
         {
-            return BadRequestProblem("A fields data was expected");
+            return BadRequestProblem("'data.fields' was expected in the form");
         }
-
-        PdfFile pdfFile;
 
         try
-        {
-            pdfFile = new PdfFile(request.file, PdfFileOpenMode.ReadWrite);
-            pdfFile.Fill(request);
-        }
-        catch (Exception exc)
-        {
-            return BadRequestProblem($"The document processing error: '{exc.Message}'");
-        }
-
-        try {
-            var outputStream = pdfFile.GetOuputStream();
-            if (outputStream == null)
-                throw new InvalidOperationException("The output stream is null");
+        {            
+            var outputStream = _pdfService.Fill(request.file, request.data!.Fields);
             return File(outputStream, "application/pdf");
         }
         catch (Exception exc)
@@ -56,25 +46,28 @@ public class PdfController : BaseController
     [Route("fields")]
     [HttpPost]
     [Consumes("multipart/form-data")]
-    [ProducesResponseType(typeof(FieldsResponse<FormField>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(FieldsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public IActionResult ReadFields(IFormFile file)
     {
-        PdfFile pdfFile;
-
         try
         {
-            pdfFile = new PdfFile(file);
+            var list = _pdfService.ReadFields(file);
+            return Ok(new FieldsResponse()
+            {
+                FieldsCount = list.Count,
+                Fields = list.Select(f => new FieldsResponse.Field()
+                {
+                    Name = f.Name,
+                    Type = f.Type,
+                    Page = f.Page,
+                    Value = f.Value
+                }).ToList()
+            });
         }
         catch(Exception exc)
         {
             return BadRequestProblem(exc.Message);
         }
-
-        return Ok(new FieldsResponse<FormField>()
-        {
-            FieldsCount = pdfFile.Fields.Count,
-            Fields = pdfFile.Fields
-        });
     }
 }

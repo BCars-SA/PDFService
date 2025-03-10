@@ -4,11 +4,14 @@ using API.Converters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
+namespace API.Models.Requests;
+
 [ModelBinder(BinderType = typeof(FillRequestBinder))]
 public class FillRequest
-{
-    public IFormFile? file { get; set; }
-    public FieldsData? data { get; set; }
+{    
+    public required IFormFile file { get; set; }
+    
+    public required FieldsData data { get; set; }
 
     public class FieldsData
     {
@@ -43,7 +46,13 @@ public class FillRequestBinder : IModelBinder
             throw new ArgumentNullException(nameof(bindingContext));
         }
 
+        if (bindingContext.HttpContext.Request.Form.Files["file"] == null) 
+        {
+            throw new InvalidOperationException("The 'file' form data was expected in the request");
+        }
+
         var fillRequest = new FillRequest() {
+            file = bindingContext.HttpContext.Request.Form.Files["file"]!,
             data = new FillRequest.FieldsData()
         };
         foreach (var key in bindingContext.HttpContext.Request.Form.Keys)
@@ -66,8 +75,7 @@ public class FillRequestBinder : IModelBinder
                     throw new InvalidOperationException($"The request data json deserialization error: [{ex.Message}]");
                 }
             }
-        }
-        fillRequest.file = bindingContext.HttpContext.Request.Form.Files["file"];
+        }        
         bindingContext.Result = ModelBindingResult.Success(fillRequest);
         return Task.CompletedTask;
     }
