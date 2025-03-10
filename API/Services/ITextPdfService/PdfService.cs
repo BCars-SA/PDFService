@@ -1,31 +1,27 @@
-using API.Models.Pdf.Fields;
+using API.Models.Pdf;
 using API.Models.Requests;
+using API.Services.ITextPdfService.Fields;
 using iText.Forms;
 using iText.Forms.Fields;
 using iText.IO.Source;
 using iText.Kernel.Pdf;
 
-namespace API.Services;
-
-public interface IPdfService {    
-    List<FormField> ReadFields(IFormFile pdfFile);
-    byte[] Fill(IFormFile pdfFile, List<FillRequest.Field> fields);
-}
+namespace API.Services.ITextPdfService;
 
 public class PdfService : IPdfService
 {
-    public List<FormField> ReadFields(IFormFile pdfFile)
+    public List<PdfField> ReadFields(IFormFile pdfFile)
     {
         var pdfDocument = OpenPdfDocument(pdfFile, PdfFileOpenMode.Read, out _);
         return ReadAllFormFields(pdfDocument, false);
     }
-    
+
     public byte[] Fill(IFormFile pdfFile, List<FillRequest.Field> fields)
     {
         var pdfDocument = OpenPdfDocument(pdfFile, PdfFileOpenMode.ReadWrite, out var outputStream);
         var formFields = ReadAllFormFields(pdfDocument, true);
-        var fieldsDictionary = formFields.ToDictionary(f => f.Name.ToLower(), f => f);        
-        
+        var fieldsDictionary = formFields.ToDictionary(f => f.Name.ToLower(), f => f);
+
         foreach (var field in fields)
         {
             var fieldName = field.Name?.ToLower();
@@ -42,16 +38,17 @@ public class PdfService : IPdfService
                 //to do
             }
         }
-        
+
         pdfDocument.Close();
-        if (outputStream != null) 
+
+        if (outputStream != null)
             return outputStream.GetBuffer();
-        else 
+        else
             throw new InvalidOperationException("The output stream is null");
     }
 
     private PdfDocument OpenPdfDocument(IFormFile pdfFile, PdfFileOpenMode mode, out ByteArrayOutputStream? outputStream)
-    {        
+    {
         outputStream = null;
         PdfReader reader = new PdfReader(pdfFile.OpenReadStream());
 
@@ -64,19 +61,19 @@ public class PdfService : IPdfService
         }
     }
 
-    private List<FormField> ReadAllFormFields(PdfDocument pdfDocument, bool createIfNotExist)
-    {        
-        List<FormField> fieldsList = new List<FormField>();
+    private List<PdfField> ReadAllFormFields(PdfDocument pdfDocument, bool createIfNotExist)
+    {
+        List<PdfField> fieldsList = new List<PdfField>();
 
         PdfAcroForm acroForm = PdfFormCreator.GetAcroForm(pdfDocument, createIfNotExist);
 
         if (acroForm != null)
         {
-            IDictionary<String, PdfFormField> formFields = acroForm.GetAllFormFields();
+            IDictionary<string, PdfFormField> formFields = acroForm.GetAllFormFields();
 
             foreach (var formField in formFields)
             {
-                FormField field = FieldFactory.Create(formField.Value);
+                PdfField field = FieldFactory.Create(formField.Value);
                 fieldsList.Add(field);
             }
         }

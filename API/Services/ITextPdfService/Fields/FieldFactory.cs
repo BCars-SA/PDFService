@@ -1,16 +1,18 @@
-﻿using iText.Forms.Fields;
+﻿using API.Models.Pdf;
+using iText.Forms.Fields;
 
-namespace API.Models.Pdf.Fields;
+namespace API.Services.ITextPdfService.Fields;
 
 public static class FieldFactory
 {
     private static Dictionary<Type, Type> TYPE_MAP_DICT = new()
     {
         { typeof(PdfTextFormField), typeof(TextField) },
-        { typeof(PdfChoiceFormField), typeof(ChoiceField) }
+        { typeof(PdfChoiceFormField), typeof(ChoiceField) },
+        { typeof(PdfButtonFormField), typeof(ButtonField) }
     };
 
-    public static FormField Create(PdfFormField formField)
+    public static PdfField Create(PdfFormField formField)
     {
         Type type = formField.GetType();
 
@@ -22,10 +24,10 @@ public static class FieldFactory
             {
                 var field = Activator.CreateInstance(fieldType, formField);
                 if (field != null)
-                    return (FormField)field;
+                    return (PdfField)field;
             }
         }
 
-        return new FormField(formField);
+        return new BaseFormField(formField);
     }
 }

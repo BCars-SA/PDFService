@@ -1,4 +1,4 @@
-﻿namespace API.Models.Pdf.Fields;
+﻿namespace API.Services.ITextPdfService.Fields;
 
 public enum FieldTypes
 {
@@ -10,6 +10,23 @@ public enum FieldTypes
 
     [StringValue("listbox")]
     ListBox,
+
+    [StringValue("radiobuttongroup")]
+    RadioButtonGroup,
+
+    /// <summary>
+    /// A group of radio buttons within a radio button field that use the same
+    /// value for the on state will turn on and off in unison; that is if one is checked,
+    /// they are all checked
+    /// </summary>
+    [StringValue("unisonradiogroup")]
+    RadioInUnisonGroup,
+
+    [StringValue("checkbox")]
+    CheckBox,
+
+    [StringValue("pushbutton")]
+    PushButton,
 
     [StringValue("undefined")]
     Undefined
