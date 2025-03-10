@@ -1,6 +1,4 @@
-﻿using API.Data;
-using API.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using NLog;
 
 namespace API.Controllers;
@@ -11,15 +9,10 @@ abstract public class BaseController : ControllerBase
     protected readonly IConfiguration _configuration;
     protected readonly Logger _logger;
 
-    public static readonly int LIST_LIMIT = 500;
-
-    protected readonly BaseDBContext<User>? _userContext;
-
-    public BaseController(IConfiguration configuration, BaseDBContext<User>? userContext = null)
+    public BaseController(IConfiguration configuration)
     {
         _configuration = configuration;
         _logger = NLog.LogManager.GetCurrentClassLogger();
-        _userContext = userContext;
     }
 
     [NonAction]
@@ -56,12 +49,7 @@ abstract public class BaseController : ControllerBase
     }
 }
 
-public interface IBaseResponse
-{
-
-}
-
-public class SuccessResponse : IBaseResponse
+public class SuccessResponse
 {
     public bool Success { get; set; }
 }

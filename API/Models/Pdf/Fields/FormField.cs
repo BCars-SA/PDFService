@@ -1,4 +1,5 @@
 ﻿using API.Controllers;
+using API.Converters;
 using iText.Forms.Fields;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Annot;
@@ -19,7 +20,7 @@ public class FormField
 
     public string Name => _field.GetFieldName().ToString();
 
-    [JsonConverter(typeof(ValueJsonConverter))]
+    [JsonConverter(typeof(FieldValueJsonConverter))]
     public virtual object? Value
     {
         get

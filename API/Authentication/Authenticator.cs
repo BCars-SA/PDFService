@@ -15,19 +15,9 @@ public class Authenticator
     }
 
 
-    public string? Authenticate(IUser? user, string? password)
+    public string? Authenticate(string username)
     {
-        if (user != null && user.Username != null && password != null)
-        {
-            string? storedHash = user.Password;
-            bool isValid = storedHash != null && BCrypt.Net.BCrypt.EnhancedVerify(password, storedHash);
-            if (isValid)
-            {
-                // If credentials are valid, generate JWT token                    
-                return this.GenerateAccessToken(user.Username);
-            }
-        }
-        return null;
+        return this.GenerateAccessToken(username);
     }
 
     private string GenerateAccessToken(string username, string[]? roles = null)
