@@ -1,0 +1,55 @@
+name: Build, Push to ECR and Deploy to ECS
+
+on: 
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Prepare credentials for AWS ECR login action
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      
+      - name: Login to AWS ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2        
+      
+      # Build and Push API image
+      - name: "API: Build and push image to ECR"        
+        id: build-api-image
+        env:          
+          ECR_REGISTRY: ${{ vars.AWS_ECR }}
+          ECR_REPOSITORY: pdfserviceapi
+          IMAGE_TAG: ${{ github.sha }}          
+        run: |
+          docker build --build-arg PORT=5000 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG . -f Dockerfile.api
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+            
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def-api
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: aws-ecs-task-definition.json
+          container-name: backend
+          image: ${{ steps.build-api-image.outputs.image }}
+
+      # Deploy to ECS (Using Docker Compose)
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-api.outputs.task-definition }}
+          service: PdfService
+          cluster: PdfServiceCluster
+          #wait-for-service-stability: true
+     
+     
