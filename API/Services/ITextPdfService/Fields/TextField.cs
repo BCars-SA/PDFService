@@ -1,8 +1,8 @@
 ﻿using iText.Forms.Fields;
 
-namespace API.Models.Pdf.Fields;
+namespace API.Services.ITextPdfService.Fields;
 
-public class TextField : FormField
+public class TextField : BaseFormField
 {
     public TextField(PdfFormField field) : base(field)
     {

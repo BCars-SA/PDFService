@@ -1,27 +1,27 @@
-﻿using API.Controllers;
-using API.Converters;
+﻿using API.Converters;
+using API.Models.Pdf;
 using iText.Forms.Fields;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Annot;
 using System.Text.Json.Serialization;
 
-namespace API.Models.Pdf.Fields;
+namespace API.Services.ITextPdfService.Fields;
 
-public class FormField
+public class BaseFormField : PdfField
 {
     protected PdfFormField _field;
     protected PdfDocument _document;
 
-    public FormField(PdfFormField field)
+    public BaseFormField(PdfFormField field)
     {
         _field = field;
         _document = _field.GetDocument();
     }
 
-    public string Name => _field.GetFieldName().ToString();
+    public override string Name => _field.GetFieldName().ToString();
 
     [JsonConverter(typeof(FieldValueJsonConverter))]
-    public virtual object? Value
+    public override object? Value
     {
         get
         {
@@ -34,7 +34,7 @@ public class FormField
         }
     }
 
-    public virtual string? DisplayValue
+    public override string? DisplayValue
     {
         get
         {
@@ -43,11 +43,11 @@ public class FormField
         }
     }
 
-    public virtual string Type => FieldTypes.Undefined.GetString();
+    public override string Type => FieldTypes.Undefined.GetString();
 
-    public bool? IsReadOnly => _field.IsReadOnly() ? true : null;
+    public override bool? IsReadOnly => _field.IsReadOnly() ? true : null;
 
-    public int? Page
+    public override int? Page
     {
         get
         {

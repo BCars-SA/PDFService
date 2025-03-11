@@ -1,9 +1,9 @@
 ﻿using iText.Forms.Fields;
 using iText.Kernel.Pdf;
 
-namespace API.Models.Pdf.Fields;
+namespace API.Services.ITextPdfService.Fields;
 
-public class ChoiceField : FormField
+public class ChoiceField : BaseFormField
 {
     PdfChoiceFormField PdfChoiceField { get => (PdfChoiceFormField)_field; }
 
@@ -47,8 +47,8 @@ public class ChoiceField : FormField
                 case null:
 
                     if (IsCombo && !IsEdit)
-                        throw new InvalidOperationException($"The value cannot be empty. The field '{Name}' is a combobox and cannot be edited."); 
-                    
+                        throw new InvalidOperationException($"The value cannot be empty. The field '{Name}' is a combobox and cannot be edited.");
+
                     PdfChoiceField.SetListSelected(new int[] { });
                     break;
 
@@ -114,14 +114,14 @@ public class ChoiceField : FormField
                             {
                                 if (!IsCombo || !IsEdit)
                                     throw new InvalidOperationException($"The value '{stringValue}' cannot be set for the '{Name}' field. The list does not contain this value and cannot be edited.");
-                                
+
                                 if (!optionsToSet.Contains(stringValue))
                                     optionsToSet.Add(stringValue);
                             }
                             else if (!optionsToSet.Contains(optionToSet))
                                 optionsToSet.Add(optionToSet);
                         }
-                        
+
                         PdfChoiceField.SetListSelected(optionsToSet.ToArray());
                     }
                     else
@@ -166,14 +166,14 @@ public class ChoiceField : FormField
     {
         get
         {
-            return ((PdfChoiceFormField)_field).IsCombo() ? FieldTypes.ComboBox.GetString() : FieldTypes.ListBox.GetString();
+            return PdfChoiceField.IsCombo() ? FieldTypes.ComboBox.GetString() : FieldTypes.ListBox.GetString();
         }
     }
 
-    private List<String?> GetFieldOptionsToUnicodeNames()
+    private List<string?> GetFieldOptionsToUnicodeNames()
     {
         PdfArray options = PdfChoiceField.GetOptions();
-        var optionsToUnicodeNames = new List<String?>(options.Size());
+        var optionsToUnicodeNames = new List<string?>(options.Size());
         for (int index = 0; index < options.Size(); index++)
         {
             PdfObject option = options.Get(index);

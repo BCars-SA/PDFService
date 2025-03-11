@@ -55,6 +55,7 @@ public class FillRequestBinder : IModelBinder
             file = bindingContext.HttpContext.Request.Form.Files["file"]!,
             data = new FillRequest.FieldsData()
         };
+
         foreach (var key in bindingContext.HttpContext.Request.Form.Keys)
         {
             if (key == "data")
@@ -76,7 +77,9 @@ public class FillRequestBinder : IModelBinder
                 }
             }
         }        
+
         bindingContext.Result = ModelBindingResult.Success(fillRequest);
+
         return Task.CompletedTask;
     }
 }
