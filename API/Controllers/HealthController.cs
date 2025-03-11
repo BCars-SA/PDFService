@@ -15,7 +15,7 @@ public class HealthController : ControllerBase
         _logger = NLog.LogManager.GetCurrentClassLogger();
     }
 
-    [Route("health")]
+    [Route("health")]    
     [HttpGet]
     [ProducesResponseType(typeof(SuccessResponse), StatusCodes.Status200OK)]
     public IActionResult Get()
