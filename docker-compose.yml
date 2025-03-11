@@ -1,0 +1,15 @@
+services:  
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile.api      
+      args:
+        - PORT=5000
+    image: pdfservice.api
+    ports:
+      - "5000:5000"
+    networks:
+      - internal
+
+networks:
+  internal:

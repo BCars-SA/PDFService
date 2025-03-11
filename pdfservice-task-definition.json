@@ -1,0 +1,58 @@
+{
+    "family": "pdfservice-task-definition", 
+    "executionRoleArn": "arn:aws:iam::992382760160:role/AWSECSTasksRole",
+    "requiresCompatibilities": [
+        "EC2",
+        "FARGATE"
+    ],
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    },
+    "cpu": "256",
+    "memory": "512",
+    "networkMode": "awsvpc",     
+    "containerDefinitions": [        
+        {
+            "name": "backend",
+            "image": "992382760160.dkr.ecr.eu-central-1.amazonaws.com/pdfserviceapi:latest",
+            "portMappings": [
+                {
+                    "containerPort": 5000,                    
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "PORT",
+                    "value": "5000"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/pdfservice-task-definition",
+                    "awslogs-create-group": "true",
+                    "awslogs-region": "eu-central-1",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            },         
+            "healthCheck": {
+                "command": [
+                    "CMD-SHELL",
+                    "curl -f http://localhost:5000/health || exit 1"
+                ],
+                "interval": 30,
+                "timeout": 5,
+                "retries": 3
+            },        
+            "systemControls": [],
+            "memory": 512,
+            "cpu": 128,
+            "essential": true,
+            "volumesFrom": [],
+            "mountPoints": []
+        }
+    ]
+}

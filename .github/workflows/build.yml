@@ -1,0 +1,11 @@
+name: "Build"
+
+on: 
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  build-net:
+    uses: BCars-SA/.github/.github/workflows/build-net8.yml@main
+    with:
+      runner: "'ubuntu-latest'"  
