@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using API.Models.Pdf;
 using API.Models.Requests;
 using API.Services.ITextPdfService.Fields;
@@ -20,7 +21,8 @@ public class PdfService : IPdfService
     {
         var pdfDocument = OpenPdfDocument(pdfFile, PdfFileOpenMode.ReadWrite, out var outputStream);
         var formFields = ReadAllFormFields(pdfDocument, true);
-        var fieldsDictionary = formFields.ToDictionary(f => f.Name.ToLower(), f => f);
+        // field.Name is not null here because of the ReadAllFormFields method
+        var fieldsDictionary = formFields.ToDictionary(f => f.Name!.ToLower(), f => f);
 
         foreach (var field in fields)
         {
@@ -74,7 +76,7 @@ public class PdfService : IPdfService
             foreach (var formField in formFields)
             {
                 PdfField field = FieldFactory.Create(formField.Value);
-                fieldsList.Add(field);
+                fieldsList.Add(field);                
             }
         }
 
