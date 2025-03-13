@@ -30,10 +30,10 @@ public class PdfService : IPdfService
             if (fieldName != null)
             {
                 if (!fieldsDictionary.ContainsKey(fieldName))
-                    throw new Exception($"The document field with the name '{field.Name}' not found.");
+                    throw new ArgumentException($"The document field with the name '{field.Name}' not found.");
 
                 var pdfField = fieldsDictionary[fieldName];
-                pdfField.Value = field.Value;
+                pdfField.Value = field.Value;                
             }
             else
             {
