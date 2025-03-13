@@ -6,6 +6,7 @@ using iText.Forms;
 using iText.Forms.Fields;
 using iText.IO.Source;
 using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Action;
 
 namespace API.Services.ITextPdfService;
 
@@ -41,6 +42,8 @@ public class PdfService : IPdfService
             }
         }
 
+        // try to recalculate the form using javascript        
+        pdfDocument.GetCatalog().SetOpenAction(PdfAction.CreateJavaScript("this.calculateNow();"));
         pdfDocument.Close();
 
         if (outputStream != null)
