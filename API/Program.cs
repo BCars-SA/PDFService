@@ -115,3 +115,6 @@ app.UseExceptionHandler(exceptionHandlerApp =>
 });
 
 app.Run();
+
+// needed for integration tests
+public partial class Program {}

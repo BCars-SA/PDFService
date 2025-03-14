@@ -2,11 +2,13 @@
 using API.Models.Requests;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers;
 
 [Route("pdf")]
 [ApiController]
+[Authorize]
 public class PdfController : BaseController
 {
     private readonly IPdfService _pdfService;
@@ -22,6 +24,7 @@ public class PdfController : BaseController
     [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK, "application/pdf")]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(UnauthorizedResult), StatusCodes.Status401Unauthorized)]
     public IActionResult FillDocument([FromForm] FillRequest request)
     {
         if (request.file == null)
@@ -50,6 +53,7 @@ public class PdfController : BaseController
     [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(FieldsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(UnauthorizedResult), StatusCodes.Status401Unauthorized)]
     public IActionResult ReadFields(IFormFile file)
     {
         try

@@ -60,8 +60,8 @@ namespace API.Models.Requests.Tests
             Assert.Equal("TestField", result.data.Fields?[0].Name);
         }
 
-        [Fact(DisplayName = "FillRequest BindModel should throw exception when file not provided")]
-        public async Task BindModelAsync_ShouldThrowException_WhenFileNotProvided()
+        [Fact(DisplayName = "FillRequest BindModel should return Failed result when file not provided")]
+        public async Task BindModelAsync_ShouldReturnFailedResult_WhenFileNotProvided()
         {
             // Arrange
             var formCollection = new FormCollection(new Dictionary<string, Microsoft.Extensions.Primitives.StringValues>
@@ -73,12 +73,13 @@ namespace API.Models.Requests.Tests
             var binder = new FillRequestBinder();
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => binder.BindModelAsync(modelBindingContext));
-            Assert.Contains("'file' form data was expected", exception.Message);
+            await binder.BindModelAsync(modelBindingContext);
+            Assert.True(modelBindingContext.Result.Equals(ModelBindingResult.Failed()));
+            Assert.Contains("'file' form data was expected", modelBindingContext.ModelState?["file"]?.Errors[0].ErrorMessage);
         }
 
-        [Fact(DisplayName = "FillRequest BindModel should throw exception when file provided with a wrong key")]
-        public async Task BindModelAsync_ShouldThrowException_WhenFileProvidedWrongKey()
+        [Fact(DisplayName = "FillRequest BindModel should return Failed result when file provided with a wrong key")]
+        public async Task BindModelAsync_ShouldReturnFailedResult_WhenFileProvidedWrongKey()
         {
             // Arrange
             var formCollection = new FormCollection(new Dictionary<string, Microsoft.Extensions.Primitives.StringValues>
@@ -90,12 +91,13 @@ namespace API.Models.Requests.Tests
             var binder = new FillRequestBinder();
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => binder.BindModelAsync(modelBindingContext));
-            Assert.Contains("'file' form data was expected", exception.Message);
+            await binder.BindModelAsync(modelBindingContext);
+            Assert.True(modelBindingContext.Result.Equals(ModelBindingResult.Failed()));
+            Assert.Contains("'file' form data was expected", modelBindingContext.ModelState?["file"]?.Errors[0].ErrorMessage);
         }
 
-        [Fact(DisplayName = "FillRequest BindModel should throw exception when data deserialization fails")]
-        public async Task BindModelAsync_ShouldThrowException_WhenDataDeserializationFails()
+        [Fact(DisplayName = "FillRequest BindModel should return failed result when data deserialization fails")]
+        public async Task BindModelAsync_ShouldReturnFailedResult_WhenDataDeserializationFails()
         {
             // Arrange            
             var formCollection = new FormCollection(new Dictionary<string, Microsoft.Extensions.Primitives.StringValues>
@@ -107,8 +109,9 @@ namespace API.Models.Requests.Tests
             var binder = new FillRequestBinder();
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => binder.BindModelAsync(modelBindingContext));
-            Assert.Contains("json deserialization error", exception.Message);
+            await binder.BindModelAsync(modelBindingContext);
+            Assert.True(modelBindingContext.Result.Equals(ModelBindingResult.Failed()));
+            Assert.Contains("'data' json deserialization error", modelBindingContext.ModelState?["data"]?.Errors[0].ErrorMessage);            
         }
     }
 }
