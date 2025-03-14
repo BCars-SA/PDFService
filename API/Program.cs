@@ -5,12 +5,12 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
-using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Options;
 using NLog.Extensions.Logging;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using API.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddNLog();
@@ -45,12 +45,7 @@ builder.Services.AddApiVersioning(options =>
 // Setup Swagger
 builder.Services    
     .AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>()
-    .AddSwaggerGen((options) => {
-        // https://github.com/swagger-api/swagger-ui/issues/7911
-        options.CustomSchemaIds(type => type.FullName?.Replace("+", ".")); // Use full type names in schema definitions);    
-        options.OperationFilter<SwaggerDefaultValues>();
-    });
-
+    .AddSwaggerGen(options => ConfigureSwaggerOptions.AddSwaggerGen(options));
 
 // Register PdfService
 builder.Services.AddScoped<IPdfService,PdfService>();
@@ -68,6 +63,10 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Add API key authentication
+builder.Services.AddAuthentication("ApiKeyScheme")
+    .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>("ApiKeyScheme", options => {});
+
 // APP configuration
 var app = builder.Build();
 app.UseSwagger().UseSwaggerUI(options =>
@@ -79,6 +78,9 @@ app.UseSwagger().UseSwaggerUI(options =>
             options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
         }
     });
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseCors();
 app.MapControllers();
