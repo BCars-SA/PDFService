@@ -77,7 +77,7 @@ public class PdfController : BaseController
             Page = field.Page,
             Value = field.Value,
             IsReadOnly = field.IsReadOnly,
-            AllValues = field.AllValues
+            ValueOptions = field.ValueOptions
         };
 
         if (field.ChildFields?.Count > 0)

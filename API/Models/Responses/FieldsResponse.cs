@@ -13,7 +13,7 @@ public class FieldsResponse
         public string? Type { get; set; }
         public int? Page { get; set; }
         public bool? IsReadOnly { get; set; }
-        public List<string?>? AllValues { get; set; }
+        public List<string?>? ValueOptions { get; set; }
         public List<Field>? ChildFields { get; set; } 
     }
 }

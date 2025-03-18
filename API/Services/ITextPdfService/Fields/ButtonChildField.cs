@@ -15,7 +15,7 @@ public class ButtonChildField : AbstractFormField
         set => throw new InvalidOperationException("It is not possible to set the value directly for the button in the radio button group"); 
     }
 
-    public override List<string?>? AllValues
+    public override List<string?>? ValueOptions
     {
         get => _field.GetAppearanceStates()?.ToList();
     }

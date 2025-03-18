@@ -196,7 +196,7 @@ public class ChoiceField : BaseFormField
         return optionsToUnicodeNames;
     }
 
-    public override List<string?>? AllValues
+    public override List<string?>? ValueOptions
     {
         get => GetFieldOptionsToUnicodeNames();
     }

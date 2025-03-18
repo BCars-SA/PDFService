@@ -28,11 +28,11 @@ public class ButtonField : BaseFormField
 
                 case string stringValue:
 
-                    var allvalues = AllValues;
-                    if (allvalues == null)
+                    var valueOptions = ValueOptions;
+                    if (valueOptions == null)
                         throw new InvalidOperationException($"The value '{stringValue}' cannot be set for the '{Name}' field.");
 
-                    var valueToSet = allvalues.Find(s => stringValue.Equals(s, StringComparison.OrdinalIgnoreCase));
+                    var valueToSet = valueOptions.Find(s => stringValue.Equals(s, StringComparison.OrdinalIgnoreCase));
                     if (valueToSet == null)
                         throw new InvalidOperationException($"The value '{stringValue}' cannot be set for the '{Name}' field.");
 
@@ -75,7 +75,7 @@ public class ButtonField : BaseFormField
         get => PdfButtonField.IsPushButton();
     }
 
-    public override List<string?>? AllValues
+    public override List<string?>? ValueOptions
     {
         get => PdfButtonField.GetAppearanceStates()?.ToList();
     }
