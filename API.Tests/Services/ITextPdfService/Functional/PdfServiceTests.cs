@@ -65,6 +65,7 @@ public class PdfServiceTest
         Assert.NotNull(filledPdfBytes);
         using var pdfDocument = new PdfDocument(new PdfReader(new MemoryStream(filledPdfBytes)));
         var acroForm = PdfAcroForm.GetAcroForm(pdfDocument, false);
+        Assert.NotNull(acroForm);
         var formFields = acroForm.GetAllFormFields();
         Assert.Equal("value1", formFields["field1"].GetValueAsString());
         Assert.Equal("value2", formFields["field2"].GetValueAsString());
