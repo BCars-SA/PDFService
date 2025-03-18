@@ -1,5 +1,6 @@
-﻿using API.Models.Responses;
+﻿using API.Models.Pdf;
 using API.Models.Requests;
+using API.Models.Responses;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -58,18 +59,30 @@ public class PdfController : BaseController
             return Ok(new FieldsResponse()
             {
                 FieldsCount = list.Count,
-                Fields = list.Select(f => new FieldsResponse.Field()
-                {
-                    Name = f.Name,
-                    Type = f.Type,
-                    Page = f.Page,
-                    Value = f.Value
-                }).ToList()
+                Fields = list.Select(f => GetResponseField(f)).ToList()
             });
         }
         catch(Exception exc)
         {
             return BadRequestProblem(exc.Message);
         }
+    }
+
+    private FieldsResponse.Field GetResponseField(PdfField field)
+    {
+        var responseField = new FieldsResponse.Field()
+        {
+            Name = field.Name,
+            Type = field.Type,
+            Page = field.Page,
+            Value = field.Value,
+            IsReadOnly = field.IsReadOnly,
+            ValueOptions = field.ValueOptions
+        };
+
+        if (field.ChildFields?.Count > 0)
+            responseField.ChildFields = field.ChildFields.Select(f => GetResponseField(f)).ToList();
+
+        return responseField;
     }
 }
