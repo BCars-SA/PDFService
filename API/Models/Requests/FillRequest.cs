@@ -39,6 +39,9 @@ public class FillRequest
     */
 public class FillRequestBinder : IModelBinder
 {
+    readonly string fileKey = "file";
+    readonly string dataKey = "data";
+
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
         if (bindingContext == null)
@@ -46,23 +49,34 @@ public class FillRequestBinder : IModelBinder
             throw new ArgumentNullException(nameof(bindingContext));
         }
 
-        if (bindingContext.HttpContext.Request.Form.Files["file"] == null) 
+        IFormCollection? form = null;
+        try {
+            form = bindingContext.HttpContext.Request.Form;
+        } catch (Exception) {
+            bindingContext.ModelState.AddModelError(fileKey, $"'{fileKey}' form data was expected");
+            bindingContext.Result = ModelBindingResult.Failed();
+            return Task.CompletedTask;
+        }
+
+        if (form == null || form.Files[fileKey] == null) 
         {
-            throw new InvalidOperationException("The 'file' form data was expected in the request");
+            bindingContext.ModelState.AddModelError(fileKey, $"'{fileKey}' form data was expected");
+            bindingContext.Result = ModelBindingResult.Failed();
+            return Task.CompletedTask;
         }
 
         var fillRequest = new FillRequest() {
-            file = bindingContext.HttpContext.Request.Form.Files["file"]!,
+            file = form.Files[fileKey]!,
             data = new FillRequest.FieldsData()
         };
 
-        foreach (var key in bindingContext.HttpContext.Request.Form.Keys)
+        foreach (var key in form.Keys)
         {
-            if (key == "data")
+            if (key == dataKey)
             {
                 try
                 {
-                    var value = bindingContext.HttpContext.Request.Form[key].ToString();
+                    var value = form[key].ToString();
                     fillRequest.data.Fields = JsonSerializer.Deserialize<FillRequest.FieldsData>(
                         value,
                         new JsonSerializerOptions
@@ -73,13 +87,14 @@ public class FillRequestBinder : IModelBinder
                 }
                 catch (Exception ex)
                 {
-                    throw new InvalidOperationException($"The request data json deserialization error: [{ex.Message}]");
+                    bindingContext.ModelState.AddModelError(dataKey, $"The request '{dataKey}' json deserialization error: " + ex.Message);
+                    bindingContext.Result = ModelBindingResult.Failed();            
+                    return Task.CompletedTask;                    
                 }
             }
         }        
 
         bindingContext.Result = ModelBindingResult.Success(fillRequest);
-
         return Task.CompletedTask;
     }
 }

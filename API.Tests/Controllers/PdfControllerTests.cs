@@ -23,7 +23,7 @@ namespace API.Tests.Controllers
             _controller = new PdfController(configurationMock.Object, _pdfServiceMock.Object);
         }
 
-        [Fact]
+        [Fact(DisplayName = "FillDocument returns BadRequest when file is null")]
         public void FillDocument_ReturnsBadRequest_WhenFileIsNull()
         {
             // Arrange
@@ -38,7 +38,7 @@ namespace API.Tests.Controllers
             Assert.Equal("'file' was expected in the form", problemDetails.Detail);                          
         }
 
-        [Fact]
+        [Fact(DisplayName = "FillDocument returns BadRequest when data fields are null or empty")]
         public void FillDocument_ReturnsBadRequest_WhenDataFieldsAreNullOrEmpty()
         {
             // Arrange
@@ -53,7 +53,7 @@ namespace API.Tests.Controllers
             Assert.Equal("'data.fields' was expected in the form", problemDetails.Detail);            
         }
 
-        [Fact]
+        [Fact(DisplayName = "FillDocument returns FileContentResult when successful")]
         public void FillDocument_ReturnsFileContentResult_WhenSuccessful()
         {
             // Arrange
@@ -74,8 +74,8 @@ namespace API.Tests.Controllers
             Assert.Equal("application/pdf", fileResult.ContentType);
         }
 
-        [Fact]
-        public void ReadFields_ReturnsOkResult_WithFieldsResponse()
+        [Fact(DisplayName = "FillDocument returns FieldsResponse when successful")]
+        public void ReadFields_ReturnsFieldsResponse_WhenSuccessful()
         {
             // Arrange
             var fileMock = new Mock<IFormFile>();            
@@ -93,7 +93,7 @@ namespace API.Tests.Controllers
             Assert.Equal("Field1", response.Fields[0].Name);
         }
 
-        [Fact]
+        [Fact(DisplayName = "ReadFields returns BadRequest when any exception thrown")]
         public void ReadFields_ReturnsBadRequest_WhenExceptionThrown()
         {
             // Arrange

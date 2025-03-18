@@ -58,7 +58,18 @@ public class FieldValueJsonConverter : JsonConverter<object>
     }
 
     public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
-    {
-        JsonSerializer.Serialize(writer, value, options);
+    {        
+        switch (value)
+        {            
+            case List<string> stringList:
+                JsonSerializer.Serialize(writer, stringList, options);
+                break;
+            case List<int> intList:
+                JsonSerializer.Serialize(writer, intList, options);
+                break;
+            default:
+                writer.WriteStringValue(value.ToString());
+                break;        
+        }
     }
 }
