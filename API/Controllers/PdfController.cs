@@ -19,6 +19,7 @@ public class PdfController : BaseController
 
     [Route("fill")]
     [HttpPost]
+    [ApiVersion("1.0")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK, "application/pdf")]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -46,6 +47,7 @@ public class PdfController : BaseController
 
     [Route("fields")]
     [HttpPost]
+    [ApiVersion("1.0")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(FieldsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]

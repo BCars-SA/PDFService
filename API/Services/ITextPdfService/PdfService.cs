@@ -6,6 +6,7 @@ using iText.Forms;
 using iText.Forms.Fields;
 using iText.IO.Source;
 using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Action;
 
 namespace API.Services.ITextPdfService;
 
@@ -30,10 +31,10 @@ public class PdfService : IPdfService
             if (fieldName != null)
             {
                 if (!fieldsDictionary.ContainsKey(fieldName))
-                    throw new Exception($"The document field with the name '{field.Name}' not found.");
+                    throw new ArgumentException($"The document field with the name '{field.Name}' not found.");
 
                 var pdfField = fieldsDictionary[fieldName];
-                pdfField.Value = field.Value;
+                pdfField.Value = field.Value;                
             }
             else
             {
@@ -41,6 +42,8 @@ public class PdfService : IPdfService
             }
         }
 
+        // try to recalculate the form using javascript        
+        pdfDocument.GetCatalog().SetOpenAction(PdfAction.CreateJavaScript("this.calculateNow();"));
         pdfDocument.Close();
 
         if (outputStream != null)
