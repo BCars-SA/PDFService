@@ -1,8 +1,8 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using API.Converters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace API.Models.Requests;
 
@@ -28,6 +28,8 @@ public class FillRequest
         public string? DisplayValue { get; set; }
         public double? X { get; set; }
         public double? Y { get; set; }
+        public double? Width { get; set; }
+        public double? Height { get; set; }
         public string? Type { get; set; }
         public int? Page { get; set; }
     }
@@ -41,6 +43,8 @@ public class FillRequestBinder : IModelBinder
 {
     readonly string fileKey = "file";
     readonly string dataKey = "data";
+
+    readonly long maxInvalidJsonPartToLogLength = 50;
 
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
@@ -74,9 +78,12 @@ public class FillRequestBinder : IModelBinder
         {
             if (key == dataKey)
             {
+                string value = "";
+
                 try
                 {
-                    var value = form[key].ToString();
+                    value = form[key].ToString();
+
                     fillRequest.data.Fields = JsonSerializer.Deserialize<FillRequest.FieldsData>(
                         value,
                         new JsonSerializerOptions
@@ -87,10 +94,48 @@ public class FillRequestBinder : IModelBinder
                 }
                 catch (Exception ex)
                 {
-                    bindingContext.ModelState.AddModelError(dataKey, $"The request '{dataKey}' json deserialization error: " + ex.Message);
-                    bindingContext.Result = ModelBindingResult.Failed();            
+                    var errorMessage = $"The request '{dataKey}' json deserialization error: '{ex.Message}'.";
+                    string? jsonPartToAddToError = null;
+
+                    if (ex is JsonException && !string.IsNullOrEmpty(value))
+                    {
+                        var jsonException = (JsonException)ex;
+
+                        if (jsonException.LineNumber.HasValue)
+                        {
+                            var lines = value.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
+
+                            var lineNumber = jsonException.LineNumber.Value;
+                            if (lineNumber >= 0 && lineNumber < lines.Length)
+                            {
+                                var line = lines[lineNumber];
+                                if (line.Length > maxInvalidJsonPartToLogLength)
+                                {
+                                    var errorPos = jsonException.BytePositionInLine ?? 0;
+
+                                    var startIndex = Math.Max(0, errorPos - maxInvalidJsonPartToLogLength / 2);
+                                    var length = Math.Min(line.Length, errorPos + maxInvalidJsonPartToLogLength / 2) - startIndex;
+
+                                    jsonPartToAddToError = line.Substring((int)startIndex, (int)length);
+                                }
+                                else
+                                {
+                                    jsonPartToAddToError = line;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(jsonPartToAddToError ?? value))
+                        errorMessage += $" The invalid part of the json: '{jsonPartToAddToError ?? value}'.";
+
+                    bindingContext.ModelState.AddModelError(dataKey, errorMessage);
+                    bindingContext.Result = ModelBindingResult.Failed();   
+                    
                     return Task.CompletedTask;                    
                 }
+
+                break;
             }
         }        
 
