@@ -5,6 +5,6 @@ namespace API.Services;
 
 public interface IPdfService
 {
-    List<PdfField> ReadFields(IFormFile pdfFile);
+    (List<PdfField> fields, List<PdfPageInfo> pages) ReadFields(IFormFile pdfFile);
     byte[] Fill(IFormFile pdfFile, List<FillRequest.Field> fields);
 }

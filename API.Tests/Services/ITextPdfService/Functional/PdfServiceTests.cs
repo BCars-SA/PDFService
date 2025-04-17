@@ -31,7 +31,7 @@ public class PdfServiceTest
         });
 
         // Act
-        var fields = _pdfService.ReadFields(pdfFile.Object);
+        var fields = _pdfService.ReadFields(pdfFile.Object).fields;
 
         // Assert
         Assert.NotNull(fields);

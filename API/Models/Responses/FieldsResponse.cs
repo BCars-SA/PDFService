@@ -1,9 +1,8 @@
-using API.Models.Pdf;
-
 namespace API.Models.Responses;
 
 public class FieldsResponse
 {
+    public List<Page>? Pages { get; set; }
     public int FieldsCount { get; set; }
     public List<Field>? Fields { get; set; }
 
@@ -15,5 +14,12 @@ public class FieldsResponse
         public bool? IsReadOnly { get; set; }
         public List<string?>? ValueOptions { get; set; }
         public List<Field>? ChildFields { get; set; } 
+    }
+
+    public class Page
+    {
+        public int? Number { get; set; }
+        public float? Width { get; set; }
+        public float? Height { get; set; }
     }
 }

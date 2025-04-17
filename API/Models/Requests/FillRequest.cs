@@ -25,11 +25,11 @@ public class FillRequest
         [JsonConverter(typeof(FieldValueJsonConverter))]
         public object? Value { get; set; }
 
-        public string? DisplayValue { get; set; }
-        public double? X { get; set; }
-        public double? Y { get; set; }
-        public double? Width { get; set; }
-        public double? Height { get; set; }
+        public float? X { get; set; }
+        public float? Y { get; set; }
+        public float? Scale { get; set; }
+        public float? Width { get; set; }
+        public float? Height { get; set; }
         public string? Type { get; set; }
         public int? Page { get; set; }
     }

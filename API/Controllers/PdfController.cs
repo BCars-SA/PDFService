@@ -55,14 +55,21 @@ public class PdfController : BaseController
     {
         try
         {
-            var list = _pdfService.ReadFields(file);
+            var (fields, pages) = _pdfService.ReadFields(file);
+
             return Ok(new FieldsResponse()
             {
-                FieldsCount = list.Count,
-                Fields = list.Select(f => GetResponseField(f)).ToList()
+                FieldsCount = fields.Count,
+                Pages = pages.Select(p => new FieldsResponse.Page()
+                {
+                    Number = p.Number,
+                    Width = p.Width,
+                    Height = p.Height
+                }).ToList(),
+                Fields = fields.Select(f => GetResponseField(f)).ToList()
             });
         }
-        catch(Exception exc)
+        catch (Exception exc)
         {
             return BadRequestProblem(exc.Message);
         }
