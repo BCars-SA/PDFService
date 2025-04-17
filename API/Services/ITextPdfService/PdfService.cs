@@ -76,7 +76,7 @@ public class PdfService : IPdfService
                         {
                             var scale = field.Scale.Value;
                             if (scale <= 0)
-                                throw new ArgumentException($"Invalid image sacle value: '{scale}'. The scale must be greater than 0.");
+                                throw new ArgumentException($"Invalid image scale value: '{scale}'. The scale must be greater than 0.");
 
                             image.Scale(scale, scale);
                             scaled = true;
