@@ -80,7 +80,8 @@ namespace API.Tests.Controllers
             // Arrange
             var fileMock = new Mock<IFormFile>();            
             var fields = new List<PdfField> { new TestPdfField("Field1", "Text", 1, false, "FieldValue1") };
-            _pdfServiceMock.Setup(service => service.ReadFields(It.IsAny<IFormFile>())).Returns(fields);
+            var pages = new List<PdfPageInfo> { new TestPdfPageInfo(1, 600f, 800f) };
+            _pdfServiceMock.Setup(service => service.ReadFields(It.IsAny<IFormFile>())).Returns((fields, pages));
 
             // Act
             var result = _controller.ReadFields(fileMock.Object);
@@ -91,6 +92,10 @@ namespace API.Tests.Controllers
             Assert.NotNull(response.Fields);
             Assert.Single(response.Fields);
             Assert.Equal("Field1", response.Fields[0].Name);
+
+            Assert.NotNull(response.Pages);
+            Assert.Single(response.Pages);
+            Assert.Equal(1, response.Pages[0].Number);
         }
 
         [Fact(DisplayName = "ReadFields returns BadRequest when any exception thrown")]
