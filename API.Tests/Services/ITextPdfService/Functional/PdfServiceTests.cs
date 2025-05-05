@@ -158,15 +158,15 @@ public class PdfServiceTest
         Assert.Equal("png", img.IdentifyImageFileExtension());
     }
 
-    [Fact(DisplayName = "Fill should throw an error when the image scale is incorrect")]
+    [Fact(DisplayName = "Fill should return an error if the scale is less than or equal to 0 or the width or height of the image after applying the scale or width and height, if specified, is greater than the width or height of the page.")]
     public void Fill_ShouldThrowError_WhenIncorrectImageSize()
     {
         // Arrange
         var pdfFile = CreateSimplePdfForm(new List<FillRequest.Field>());
 
-        var fistPage = _pdfService.ReadFields(pdfFile.Object).pages[0];
-        var pageWidth = fistPage.Width;
-        var pageHeight = fistPage.Height;
+        var firstPage = _pdfService.ReadFields(pdfFile.Object).pages[0];
+        var pageWidth = firstPage.Width;
+        var pageHeight = firstPage.Height;
 
         pdfFile.Object.OpenReadStream().Position = 0;
         var fieldsToFill = new List<FillRequest.Field>{
