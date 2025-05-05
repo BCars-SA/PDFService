@@ -47,15 +47,15 @@ public class PdfService : IPdfService
             {
                 if (field.Value != null && field.Value is string)
                 {
+                    var pageNum = field.Page ?? 1;
+                    var pagesCount = pdfDocument.GetNumberOfPages();
+                    if (pageNum < 1 || pageNum > pagesCount)
+                        throw new ArgumentException($"Incorrect page number: '{pageNum}'. The expected value is in the range [1, {pagesCount}].");
+
                     var stringValue = field.Value as string;
 
                     if (IsBase64String(stringValue!, out Span<byte> buffer)) //Image
                     {
-                        var pageNum = field.Page ?? 1;
-                        var pagesCount = pdfDocument.GetNumberOfPages();
-                        if (pageNum < 1 || pageNum > pagesCount)
-                            throw new ArgumentException($"Incorrect page number: '{pageNum}'. The expected value is in the range [1, {pagesCount}].");
-
                         PdfPage page = pdfDocument.GetPage(pageNum);
                         Rectangle pageSize = page.GetPageSize();
                         var pageWidth = pageSize.GetWidth();

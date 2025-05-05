@@ -3,6 +3,7 @@ using API.Services.ITextPdfService;
 using iText.Forms;
 using iText.Forms.Fields;
 using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Xobject;
 using Microsoft.AspNetCore.Http;
 using Moq;
 
@@ -39,6 +40,29 @@ public class PdfServiceTest
         Assert.Contains(fields, f => f.Name == "field1");
         Assert.Contains(fields, f => f.Name == "field2");
         Assert.Contains(fields, f => f.Name == "field3" && f.Value is string && f.Value?.ToString() == "value 3");        
+    }
+
+    [Fact(DisplayName = "ReadFields should return pages info from read PDF")]
+    public void ReadFields_ShouldReturnPagesInfo()
+    {
+        // Arrange
+        var pdfFile = CreateSimplePdfForm(new List<FillRequest.Field>());
+
+        // Act
+        var pages = _pdfService.ReadFields(pdfFile.Object).pages;
+
+        // Assert
+        Assert.NotNull(pages);
+        Assert.Single(pages);
+
+        var pageInfo = pages.First();
+        Assert.Equal(1, pageInfo.Number);
+
+        Assert.NotNull(pageInfo.Width);
+        Assert.True(pageInfo.Width > 0);
+
+        Assert.NotNull(pageInfo.Height);
+        Assert.True(pageInfo.Height > 0);
     }
 
     [Fact(DisplayName = "Fill should fill fields in real PDF")]
@@ -91,7 +115,93 @@ public class PdfServiceTest
         var exception = Assert.Throws<ArgumentException>(() => _pdfService.Fill(pdfFile.Object, fieldsToFill));
         Assert.Contains("'nonexistentField' not found", exception.Message);
     }
-    
+
+    [Fact(DisplayName = "Fill should throw an error when the page number is incorrect")]
+    public void Fill_ShouldThrowError_WhenIncorrectPageNum()
+    {
+        // Arrange
+        var pdfFile = CreateSimplePdfForm(new List<FillRequest.Field>());
+        var fieldsToFill = new List<FillRequest.Field>
+        {
+            new FillRequest.Field { Page = 2, Value = "Field 2 value" }
+        };
+
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentException>(() => _pdfService.Fill(pdfFile.Object, fieldsToFill));
+        Assert.Contains("Incorrect page number: '2'", exception.Message);
+    }
+
+    [Fact(DisplayName = "Fill should add an image in a real PDF")]
+    public void Fill_ShouldAddImage()
+    {
+        // Arrange
+        var pdfFile = CreateSimplePdfForm(new List<FillRequest.Field>());
+
+        var fieldsToFill = new List<FillRequest.Field>{
+            new FillRequest.Field { Page = 1, Value = ImageBase64String }
+        };
+
+        // Act & Assert
+        var filledPdfBytes = _pdfService.Fill(pdfFile.Object, fieldsToFill);
+        Assert.NotNull(filledPdfBytes);
+
+        using var pdfDocument = new PdfDocument(new PdfReader(new MemoryStream(filledPdfBytes)));
+
+        PdfResources resources = pdfDocument.GetPage(1).GetResources();
+        PdfDictionary xobjects = resources.GetResource(PdfName.XObject);
+        Assert.NotNull(xobjects);
+
+        PdfObject obj = xobjects.Get(new PdfName("Im1"));
+        Assert.NotNull(obj);
+
+        PdfImageXObject img = new PdfImageXObject((PdfStream)obj);
+        Assert.Equal("png", img.IdentifyImageFileExtension());
+    }
+
+    [Fact(DisplayName = "Fill should return an error if the scale is less than or equal to 0 or the width or height of the image after applying the scale or width and height, if specified, is greater than the width or height of the page.")]
+    public void Fill_ShouldThrowError_WhenIncorrectImageSize()
+    {
+        // Arrange
+        var pdfFile = CreateSimplePdfForm(new List<FillRequest.Field>());
+
+        var firstPage = _pdfService.ReadFields(pdfFile.Object).pages[0];
+        var pageWidth = firstPage.Width;
+        var pageHeight = firstPage.Height;
+
+        pdfFile.Object.OpenReadStream().Position = 0;
+        var fieldsToFill = new List<FillRequest.Field>{
+            new FillRequest.Field { Page = 1, Value = ImageBase64String, Scale = 0 }
+        };
+
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentException>(() => _pdfService.Fill(pdfFile.Object, fieldsToFill));
+        Assert.Contains("Invalid image scale value: '0'", exception.Message);
+
+        // Arrange
+        pdfFile.Object.OpenReadStream().Position = 0;
+        var scale = (pageWidth + 100) / 50;
+        fieldsToFill = new List<FillRequest.Field>{
+            new FillRequest.Field { Page = 1, Value = ImageBase64String, Scale = scale }
+        };
+
+        // Act & Assert
+        exception = Assert.Throws<ArgumentException>(() => _pdfService.Fill(pdfFile.Object, fieldsToFill));
+        Assert.Contains("Invalid image width value", exception.Message);
+
+        // Arrange
+        pdfFile.Object.OpenReadStream().Position = 0;
+        fieldsToFill = new List<FillRequest.Field>{
+            new FillRequest.Field { Page = 1, Value = ImageBase64String, Width = pageWidth + 50 , Height = pageHeight + 100 }
+        };
+
+        // Act & Assert
+        exception = Assert.Throws<ArgumentException>(() => _pdfService.Fill(pdfFile.Object, fieldsToFill));
+        Assert.Contains("Invalid image width value", exception.Message);
+    }
+
+    //Black rectangle 50x30 (.png)
+    private readonly string ImageBase64String = "iVBORw0KGgoAAAANSUhEUgAAADIAAAAeCAIAAADhM9qrAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAcSURBVFhH7cExAQAAAMKg9U9tDQ8gAAAAAK7UABGyAAFALqTGAAAAAElFTkSuQmCC";
+
     private Mock<IFormFile> CreateSimplePdfForm(List<FillRequest.Field> fields)
     {
         var stream = new MemoryStream();
