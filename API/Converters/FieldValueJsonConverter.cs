@@ -67,6 +67,15 @@ public class FieldValueJsonConverter : JsonConverter<object>
             case List<int> intList:
                 JsonSerializer.Serialize(writer, intList, options);
                 break;
+            case int intValue:
+                writer.WriteNumberValue(intValue);
+                break;
+            case double doubleValue:
+                writer.WriteNumberValue(doubleValue);
+                break;
+            case bool boolValue:
+                writer.WriteBooleanValue(boolValue);
+                break;
             default:
                 writer.WriteStringValue(value.ToString());
                 break;        
