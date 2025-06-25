@@ -8,9 +8,9 @@ namespace API.Models.Requests;
 
 [ModelBinder(BinderType = typeof(FillRequestBinder))]
 public class FillRequest
-{    
+{
     public required IFormFile file { get; set; }
-    
+
     public required FieldsData data { get; set; }
 
     public class FieldsData
@@ -31,7 +31,45 @@ public class FillRequest
         public float? Width { get; set; }
         public float? Height { get; set; }
         public string? Type { get; set; }
+        public TextStyle? TextStyle { get; set; }
         public int? Page { get; set; }
+    }
+
+    public class TextStyle
+    {
+        public float? Leading { get; set; }
+        public string? Color { get; set; }
+
+        [JsonConverter(typeof(EnumJsonConverter<TextHorizontalAlignment>))]
+        public TextHorizontalAlignment? HorizontalAlignment { get; set; }
+
+        [JsonConverter(typeof(EnumJsonConverter<TextVerticalAlignment>))]
+        public TextVerticalAlignment? VerticalAlignment { get; set; }
+
+        public FontStyle? Font { get; set; }
+    }
+
+    public enum TextHorizontalAlignment
+    {
+        LEFT,
+        CENTER,
+        RIGHT
+    }
+
+    public enum TextVerticalAlignment
+    {
+        TOP,
+        MIDDLE,
+        BOTTOM
+    }
+
+    public class FontStyle
+    {
+        public string? Name { get; set; } = null;
+        public float? Size { get; set; }
+        public bool? Bold { get; set; }
+        public bool? Italic { get; set; }
+        public bool? Underline { get; set; }
     }
 }
 

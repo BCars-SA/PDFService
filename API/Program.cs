@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
-using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Options;
 using NLog.Extensions.Logging;
 using Swashbuckle.AspNetCore.SwaggerGen;

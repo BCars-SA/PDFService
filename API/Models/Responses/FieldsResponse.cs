@@ -3,6 +3,7 @@ namespace API.Models.Responses;
 public class FieldsResponse
 {
     public List<Page>? Pages { get; set; }
+    public List<string>? Fonts { get; set; }
     public int FieldsCount { get; set; }
     public List<Field>? Fields { get; set; }
 
