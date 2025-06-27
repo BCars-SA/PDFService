@@ -140,9 +140,9 @@ public class PdfService : IPdfService
                         var y = field.Y ?? 0;
 
                         if (textX < 0 || textX > pageWidth)
-                            throw new ArgumentException($"Invalid text coordanate X value: '{textX}'. The value must be greater than 0 and less than the width of the page: '{pageWidth}'.");
+                        throw new ArgumentException($"Invalid text coordinate X value: '{textX}'. The value must be greater than 0 and less than the width of the page: '{pageWidth}'.");
                         if (y < 0 || y > pageHeight)
-                            throw new ArgumentException($"Invalid text coordanate Y value: '{y}'. The value must be greater than 0 and less than the height of the page: '{pageHeight}'.");
+                            throw new ArgumentException($"Invalid text coordinate Y value: '{y}'. The value must be greater than 0 and less than the height of the page: '{pageHeight}'.");
 
                         if (field.Width != null)
                         {
