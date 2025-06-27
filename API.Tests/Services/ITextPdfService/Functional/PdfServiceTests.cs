@@ -272,7 +272,7 @@ public class PdfServiceTest
 
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => _pdfService.Fill(pdfFile.Object, fieldsToFill));
-        Assert.Contains("Invalid text coordanate X value", exception.Message);
+        Assert.Contains("Invalid text coordinate X value", exception.Message);
 
         // Arrange
         pdfFile.Object.OpenReadStream().Position = 0;
@@ -282,7 +282,7 @@ public class PdfServiceTest
 
         // Act & Assert
         exception = Assert.Throws<ArgumentException>(() => _pdfService.Fill(pdfFile.Object, fieldsToFill));
-        Assert.Contains("Invalid text coordanate Y value", exception.Message);
+        Assert.Contains("Invalid text coordinate Y value", exception.Message);
 
         // Arrange
         pdfFile.Object.OpenReadStream().Position = 0;
