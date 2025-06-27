@@ -351,10 +351,10 @@ class FontsHelper
                 return PdfFontFactory.CreateFont(allFontsFromResources[fontName]);
             }
 
-            var allDocumrntFonts = GetAllDocumentFonts();
-            if (allDocumrntFonts.ContainsKey(fontName))
+            var allDocumentFonts = GetAllDocumentFonts();
+            if (allDocumentFonts.ContainsKey(fontName))
             {
-                return PdfFontFactory.CreateFont(allDocumrntFonts[fontName]);
+                return PdfFontFactory.CreateFont(allDocumentFonts[fontName]);
             }
         }
 
