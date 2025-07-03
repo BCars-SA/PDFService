@@ -81,7 +81,8 @@ namespace API.Tests.Controllers
             var fileMock = new Mock<IFormFile>();            
             var fields = new List<PdfField> { new TestPdfField("Field1", "Text", 1, false, "FieldValue1") };
             var pages = new List<PdfPageInfo> { new TestPdfPageInfo(1, 600f, 800f) };
-            _pdfServiceMock.Setup(service => service.ReadFields(It.IsAny<IFormFile>())).Returns((fields, pages));
+            var fonts = new List<string> { "arial-mt", "arial-boldmt", "arial-italicmt", "arial-bolditalicmt" };
+            _pdfServiceMock.Setup(service => service.ReadFields(It.IsAny<IFormFile>())).Returns((fields, pages, fonts));
 
             // Act
             var result = _controller.ReadFields(fileMock.Object);
@@ -96,6 +97,10 @@ namespace API.Tests.Controllers
             Assert.NotNull(response.Pages);
             Assert.Single(response.Pages);
             Assert.Equal(1, response.Pages[0].Number);
+
+            Assert.NotNull(response.Fonts);
+            Assert.Equal(4, response.Fonts.Count);
+            Assert.Equal("arial-mt", response.Fonts[0]);
         }
 
         [Fact(DisplayName = "ReadFields returns BadRequest when any exception thrown")]

@@ -1,9 +1,5 @@
-
-using System;
-using System.Collections.Generic;
-using System.Text.Json;
 using API.Converters;
-using Xunit;
+using System.Text.Json;
 
 namespace API.Tests.Converters
 {
@@ -73,14 +69,14 @@ namespace API.Tests.Converters
         }
 
         [Theory(DisplayName = "Write single value serializes correctly")]
-        [InlineData("stringValue", "stringValue")]
-        [InlineData(123, 123)]        
-        [InlineData(true, true)]
-        [InlineData(false, false)]        
+        [InlineData("stringValue", "\"stringValue\"")]
+        [InlineData(123, "123")]        
+        [InlineData(true, "true")]
+        [InlineData(false, "false")]        
         public void Write_Value_SerializesCorrectly(object value, object result)
         {
             var json = JsonSerializer.Serialize(value, _options);
-            Assert.Equal(value, result);
+            Assert.Equal(result, json);
         }
         
         [Fact(DisplayName = "Write string array serializes correctly")]

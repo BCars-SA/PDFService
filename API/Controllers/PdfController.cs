@@ -55,7 +55,7 @@ public class PdfController : BaseController
     {
         try
         {
-            var (fields, pages) = _pdfService.ReadFields(file);
+            var (fields, pages, fonts) = _pdfService.ReadFields(file);
 
             return Ok(new FieldsResponse()
             {
@@ -66,6 +66,7 @@ public class PdfController : BaseController
                     Width = p.Width,
                     Height = p.Height
                 }).ToList(),
+                Fonts = fonts,
                 Fields = fields.Select(f => GetResponseField(f)).ToList()
             });
         }
