@@ -1,10 +1,8 @@
 using API.Models.Pdf;
 using API.Models.Requests;
 using API.Services.ITextPdfService.Fields;
-using iText.Commons.Utils;
 using iText.Forms;
 using iText.Forms.Fields;
-using iText.IO.Font;
 using iText.IO.Image;
 using iText.IO.Source;
 using iText.Kernel.Colors;
@@ -17,7 +15,6 @@ using NLog;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using static API.Models.Requests.FillRequest;
-using IO = System.IO;
 using iTextProperties = iText.Layout.Properties;
 
 namespace API.Services.ITextPdfService;
@@ -38,7 +35,7 @@ public class PdfService : IPdfService
         PdfDocument pdfDocument = OpenPdfDocument(pdfFile, PdfFileOpenMode.Read, out _);
         var fontsHelper = new FontsHelper(pdfDocument, _configuration, _logger);
 
-        return (ReadAllFormFields(pdfDocument, false), ReadAllPagesInfo(pdfDocument), fontsHelper.ReadAllAvailableFontsKeys());
+        return (ReadAllFormFields(pdfDocument, false), ReadAllPagesInfo(pdfDocument), fontsHelper.AllAvailableFontsKeys);
     }
 
     public byte[] Fill(IFormFile pdfFile, List<FillRequest.Field> fields)
@@ -302,186 +299,6 @@ public class PdfService : IPdfService
             pageInfoList.Add(new PageInfo(pdfDocument.GetPage(i)));
 
         return pageInfoList;
-    }
-}
-
-class FontsHelper
-{
-    PdfDocument _pdfDocument;
-    IConfiguration? _configuration;
-    Logger _logger;
-
-    public FontsHelper(PdfDocument pdfDocument, IConfiguration? configuration, Logger logger)
-    {
-        _pdfDocument = pdfDocument;
-        _configuration = configuration;
-        _logger = logger;
-    }
-
-    public bool FontExists(string fontName)
-    {
-        return AllAvailableFonts.Contains(fontName.Trim().ToLowerInvariant());
-    }
-
-    public bool IsFontBold(string? fontName)
-    {
-        return fontName != null && fontName.ToLowerInvariant().Contains("bold");
-    }
-
-    public bool IsFontItalic(string? fontName)
-    {
-        fontName = fontName?.ToLowerInvariant();
-        return fontName != null && (fontName.Contains("italic") || fontName.Contains("oblique"));
-    }
-
-    public PdfFont? CreateFont(string fontName)
-    {
-        fontName = fontName.Trim().ToLowerInvariant();
-
-        if (FontExists(fontName))
-        {
-            if (FontProgramFactory.GetRegisteredFonts().Contains(fontName))
-            {
-                return PdfFontFactory.CreateRegisteredFont(fontName);
-            }
-
-            var allFontsFromResources = GetAllFontsFromResources();
-            if (allFontsFromResources.ContainsKey(fontName))
-            {
-                return PdfFontFactory.CreateFont(allFontsFromResources[fontName]);
-            }
-
-            var allDocumentFonts = GetAllDocumentFonts();
-            if (allDocumentFonts.ContainsKey(fontName))
-            {
-                return PdfFontFactory.CreateFont(allDocumentFonts[fontName]);
-            }
-        }
-
-        return null;
-    }
-
-    List<string>? _allAvailableFonts;
-    List<string> AllAvailableFonts
-    {
-        get 
-        { 
-            return ReadAllAvailableFontsKeys(); 
-        }
-    }
-
-    public List<string> ReadAllAvailableFontsKeys()
-    {
-        if (_allAvailableFonts == null)
-        {
-            var allFonts = new List<string>();
-
-            allFonts.AddRange(FontProgramFactory.GetRegisteredFonts().Select(f => f.ToLowerInvariant()));
-            allFonts.AddRange(GetAllDocumentFonts().Keys.Select(f => f.ToLowerInvariant()));
-            allFonts.AddRange(GetAllFontsFromResources().Keys);
-
-            _allAvailableFonts = allFonts.Distinct().ToList();
-        }
-
-        return _allAvailableFonts;
-    }
-
-    Dictionary<string, PdfDictionary>? _documentFonts;
-    private Dictionary<string, PdfDictionary> GetAllDocumentFonts()
-    {
-        if (_documentFonts == null)
-        {
-            _documentFonts = new Dictionary<string, PdfDictionary>();
-
-            var pagesCount = _pdfDocument.GetNumberOfPages();
-            for (int i = 1; i <= pagesCount; i++)
-            {
-                var page = _pdfDocument.GetPage(i);
-                PdfDictionary fontsDict = page.GetResources().GetResource(PdfName.Font);
-
-                if (fontsDict != null)
-                {
-                    foreach (PdfName key in fontsDict.KeySet())
-                    {
-                        var fontDict = fontsDict.GetAsDictionary(key);
-                        if (fontDict != null)
-                        {
-                            string? fontName = fontDict.GetAsName(PdfName.BaseFont)?.GetValue().ToLowerInvariant();
-
-                            if (!string.IsNullOrEmpty(fontName) && !_documentFonts.ContainsKey(fontName))
-                                _documentFonts.Add(fontName, fontDict);
-                        }
-                    }
-                }
-            }
-        }
-
-        return _documentFonts;
-    }
-
-    Dictionary<string, string>? _resourcesFonts;
-    private Dictionary<string, string> GetAllFontsFromResources()
-    {
-        if (_resourcesFonts == null)
-        {
-            _resourcesFonts = new Dictionary<string, string>();
-
-            if (_configuration != null)
-            {
-                var fontsPaths = _configuration.GetSection("Resources:Fonts");
-                if (fontsPaths != null )
-                {
-                    foreach (var pathSection in fontsPaths.GetChildren())
-                    {
-                        var path = pathSection.Value;
-                        if (!string.IsNullOrEmpty(path))
-                        {
-                            DirectoryInfo directoryInfo = new DirectoryInfo(path);
-                            if (directoryInfo.Exists)
-                            {
-                                List<FileInfo> files = directoryInfo.GetFiles().ToList();
-
-                                foreach (var file in files)
-                                {
-                                    String fileExtension = file.Extension.ToLowerInvariant();
-                                    switch (fileExtension)
-                                    {
-                                        case ".afm":
-                                        case ".pfm":
-                                            String pfb = IO.Path.ChangeExtension(file.FullName, ".pfb");
-                                            if (FileUtil.FileExists(pfb))
-                                                AddToFontList(file.FullName);
-                                            break;
-
-                                        case ".ttf":
-                                        case ".otf":
-                                            AddToFontList(file.FullName);
-                                            break;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                _logger.Warn($"Fonts directory '{path}' not found.");
-                            }
-                        }
-                    }
-                }
-
-                void AddToFontList(string fontPath)
-                {
-                    FontProgramDescriptor descriptor = FontProgramDescriptorFactory.FetchDescriptor(fontPath);
-                    if (descriptor != null)
-                    {
-                        var fontName = descriptor.GetFontNameLowerCase();
-                        if (!_resourcesFonts.ContainsKey(fontName))
-                            _resourcesFonts.Add(fontName, fontPath);
-                    }
-                }
-            }
-        }
-
-        return _resourcesFonts;
     }
 }
 
