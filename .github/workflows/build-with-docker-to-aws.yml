@@ -31,7 +31,7 @@ jobs:
           ECR_REPOSITORY: pdfserviceapi
           IMAGE_TAG: ${{ github.sha }}          
         run: |
-          docker build --build-arg PORT=5000 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG . -f Dockerfile.api
+          docker build --build-arg PORT=5000 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG . -f deploy/AWS/Dockerfile.api
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
             
@@ -39,7 +39,7 @@ jobs:
         id: task-def-api
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: aws-ecs-task-definition.json
+          task-definition: deploy/AWS/aws-ecs-task-definition.json
           container-name: backend
           image: ${{ steps.build-api-image.outputs.image }}
 
